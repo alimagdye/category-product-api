@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @default(uuid()) // make the column id a primary key and auto-generate a UUID
+  name      String    @unique @db.VarChar(60) // make the column name unique and set the length to 60
+  createdAt DateTime  @default(now()) @map("created_at") // make the column name created_at instead of createdAt
+  products  Product[] // create a one-to-many relationship with the Product model
+
+  @@map("category") // make the table name category instead of Category. double @ for the table name
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(120)
+  description String?  @default("description") @db.Text // make the column description nullable and set the type to TEXT which is unlimited 
+  price       Decimal  @db.Decimal(10, 2) // set the type to Decimal with 10 digits and 2 decimal places
+  currency    String   @default("EGP") @db.Char(3) // set the type to Char with a length of 3
+  quantity    Int      @default(0)
+  exists      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String   @map("category_id")
+
+  @@map("product")
+}
